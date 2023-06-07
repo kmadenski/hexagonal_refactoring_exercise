@@ -1,0 +1,18 @@
+{
+    "name": "kmadenski/hexagonal_php_refactoring_exercise",
+    "authors": [
+        {
+            "name": "kmadenski",
+            "email": "kmadenski@gmail.com"
+        }
+    ],
+    "autoload": {
+        "classmap": ["src/","tests/"]
+    },
+    "require": {
+        "vlucas/phpdotenv": "^5.5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10"
+    }
+}
