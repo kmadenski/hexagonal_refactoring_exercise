@@ -13,7 +13,7 @@ This project is a **PHP 8.1 CLI application** designed to process input files an
 ## Clone the Repository
 
 ```bash
-git clone https://github.com/kmadenski/hexagonal_refactoring_exercise
+git clone git@github.com:kmadenski/hexagonal_refactoring_exercise.git
 cd hexagonal_refactoring_exercise
 ```
 # PHP CLI Application with Docker
