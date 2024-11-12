@@ -25,8 +25,8 @@ Create a `.env` file in the project root and add your Exchange Rates API token:
 ```env
 EXCHANGERATESAPI_TOKEN=your_api_token_here
 ```
-##Build and Run the Docker Container
-###Ensure entrypoint.sh is executable:
+## Build and Run the Docker Container
+### Ensure entrypoint.sh is executable:
 ```bash
 chmod +x entrypoint.sh
 ```
