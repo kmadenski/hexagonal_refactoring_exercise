@@ -25,9 +25,9 @@ class CommissionAdapter
             $transactionDto = TransactionDtoFactory::create($row);
             $commission = $this->commissionService->handle($transactionDto);
 
-            $amntFixed = $commission->value();
+            $amountFixed = $commission->value();
 
-            echo $amntFixed;
+            echo $amountFixed;
             print "\n";
         }
     }

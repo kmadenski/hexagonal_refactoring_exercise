@@ -9,75 +9,59 @@ use App\Domain\CurrencyRate;
 use App\Domain\Currency;
 use App\Domain\Service\CommissionCalculatorSelector;
 use App\Domain\Service\CurrencyRateProviderInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class CommissionCalculatorSelectorTest extends TestCase
 {
-    public function testCalculation(): void
+    #[DataProvider('commissionCalculationProvider')]
+    public function testCalculation(string $alpha2, string $amount, string $currency, float $expected): void
     {
+        // Create a mock for the CurrencyRateProviderInterface
         $currencyRateProvider = $this->getMockBuilder(CurrencyRateProviderInterface::class)
             ->getMock();
 
+        // Configure the mock to return predefined currency rates
         $currencyRateProvider->expects($this->any())
             ->method('getRate')
-            ->will($this->returnCallback(function (Currency $currency){
+            ->willReturnCallback(function (Currency $currency) {
                 $mockCurrencyRates = [
-                    'EUR' => 1,
+                    'EUR' => 1.0,
                     'USD' => 1.06865,
                     'JPY' => 149.069171,
-                    'GBP' => 0.86077
+                    'GBP' => 0.86077,
                 ];
 
-                if(!array_key_exists($currency->value(), $mockCurrencyRates)){
-                    throw new \Exception("Unexpected currency {$currency->value()}");
+                $currencyCode = $currency->value();
+
+                if (!array_key_exists($currencyCode, $mockCurrencyRates)) {
+                    throw new \Exception("Unexpected currency {$currencyCode}");
                 }
 
-                return new CurrencyRate($mockCurrencyRates[$currency->value()]);
-            }));
+                return new CurrencyRate($mockCurrencyRates[$currencyCode]);
+            });
 
         $commissionCalculatorSelector = new CommissionCalculatorSelector($currencyRateProvider);
 
-        $cases = [
-            [
-                "alpha2" => "DK",
-                "amount" => "100.00",
-                "currency" => "EUR",
-                'expected' => 2
-            ],
-            [
-                "alpha2" => "LT",
-                "amount" => "50",
-                "currency" => "USD",
-                'expected' => 0.94
-            ],
-            [
-                "alpha2" => "JP",
-                "amount" => "10000",
-                "currency" => "JPY",
-                'expected' => 1.34
-            ],
-            [
-                "alpha2" => "US",
-                "amount" => "130",
-                "currency" => "USD",
-                'expected' => 2.43
-            ],
-            [
-                "alpha2" => "GB",
-                "amount" => "2000",
-                "currency" => "GBP",
-                'expected' => 46.47
-            ]
+        // Calculate the commission
+        $commission = ($commissionCalculatorSelector->getCalculator(
+            new Bin(new Alpha2($alpha2)),
+            new Currency($currency),
+            new Amount($amount)
+        ))->commission();
+
+        // Assert that the calculated commission matches the expected value
+        $this->assertEquals($expected, $commission->value());
+    }
+
+    public static function commissionCalculationProvider(): array
+    {
+        return [
+            ['DK', '100.00', 'EUR', 2.0],
+            ['LT', '50', 'USD', 0.94],
+            ['JP', '10000', 'JPY', 1.34],
+            ['US', '130', 'USD', 2.43],
+            ['GB', '2000', 'GBP', 46.47],
         ];
-
-        foreach ($cases as $case) {
-            $commission = ($commissionCalculatorSelector->getCalculator(
-                (new Bin(new Alpha2($case['alpha2']))),
-                (new Currency($case['currency'])),
-                (new Amount($case['amount']))
-            ))->commission();
-
-            $this->assertEquals($case['expected'], $commission->value());
-        }
     }
 }
